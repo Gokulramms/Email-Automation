@@ -1,0 +1,141 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./mailops.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  accessToken  String?
+  refreshToken String?
+  tokenExpiry  DateTime?
+  lastSyncedAt DateTime?
+  syncStatus   String    @default("IDLE") // IDLE, SYNCING, ERROR
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Workplace {
+  id              String               @id @default(uuid())
+  name            String
+  description     String?
+  category        String               @default("InfoSec Review")
+  subject         String
+  bodyTemplate    String
+  replyTimerValue Int                  @default(3)
+  replyTimerUnit  String               @default("days") // hours, days, business_days
+  includeWeekends Boolean              @default(true)
+  timezone        String               @default("Asia/Kolkata")
+  ccRecipients    String?
+  status          String               @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  recipients      WorkplaceRecipient[]
+  threads         GmailThread[]
+}
+
+model WorkplaceRecipient {
+  id             String    @id @default(uuid())
+  workplaceId    String
+  name           String
+  email          String
+  gmailMessageId String?
+  gmailThreadId  String?
+  sentAt         DateTime  @default(now())
+  replyDeadline  DateTime
+  repliedAt      DateTime?
+  replyStatus    String    @default("WAITING") // WAITING, REPLIED_ON_TIME, OVERDUE, LATE_REPLY
+  lateByMinutes  Int?
+  workplace      Workplace @relation(fields: [workplaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workplaceId, email])
+  @@index([workplaceId])
+  @@index([email])
+}
+
+model LibraryUser {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  assetId    String?  // Computer / Laptop Name
+  department String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model GmailThread {
+  id            String         @id
+  workplaceId   String?
+  snippet       String?
+  subject       String?
+  lastMessageAt DateTime
+  isUnread      Boolean        @default(false)
+  workplace     Workplace?     @relation(fields: [workplaceId], references: [id], onDelete: SetNull)
+  messages      GmailMessage[]
+
+  @@index([workplaceId])
+}
+
+model GmailMessage {
+  id          String      @id
+  threadId    String
+  sender      String
+  senderEmail String
+  recipients  String
+  cc          String?
+  bcc         String?
+  subject     String
+  snippet     String?
+  bodyHtml    String?
+  bodyText    String?
+  sentAt      DateTime
+  receivedAt  DateTime
+  isFromMe    Boolean     @default(false)
+  isSent      Boolean     @default(false)
+  isStarred   Boolean     @default(false)
+  isImportant Boolean     @default(false)
+  inReplyTo   String?
+  references  String?
+  thread      GmailThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([senderEmail])
+  @@index([sentAt])
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  type        String
+  title       String
+  details     String?
+  workplaceId String?
+  timestamp   DateTime @default(now())
+}
+
+model AppNotification {
+  id        String   @id @default(uuid())
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AppSettings {
+  id                  String  @id @default("default")
+  authorizedEmail     String  @default("gokulramms@gmail.com")
+  syncIntervalSeconds Int     @default(90)
+  defaultTimerValue   Int     @default(3)
+  defaultTimerUnit    String  @default("days")
+  timezone            String  @default("Asia/Kolkata")
+  aiEnabled           Boolean @default(false)
+  geminiApiKey        String?
+  theme               String  @default("system")
+  density             String  @default("comfortable")
+  syncFromDate        String  @default("2026-09-15")
+  demoMode            Boolean @default(false)
+}
