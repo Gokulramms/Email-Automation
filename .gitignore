@@ -35,6 +35,19 @@ yarn-error.log*
 
 # vercel
 .vercel
+#Num= 843436973322
+#ALL=hppi1nbdgckqd2c2g97pc66p59
+#Final=googleusercontent.com
+#DATABASE_URL="file:./mailops.db"
+#GOOGLE_CLIENT_ID="-resb5iALL.apps.Final"
+#GOOGLE_CLIENT_SECRET="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"
+#NEXTAUTH_SECRET="mailops-secret-key-302910492"
+#NEXTAUTH_URL="http://localhost:3000"
+#GOOGLE_REDIRECT_URI="http://localhost:3000/api/auth/callback/google"
+#AUTHORIZED_EMAIL="gokulramms@gmail.com"
+#GEMINI_API_KEY="AQ.Ab8RN6I3EE2EbKIA3ZRwxx_gfS-sRNDDDfxZEYJM62bXfkUt7g"
+#DEFAULT_TIMEZONE="Asia/Kolkata"
+
 
 # typescript
 *.tsbuildinfo
